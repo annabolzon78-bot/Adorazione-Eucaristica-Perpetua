@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation }              from 'react-i18next'
+import { useAdoration }                from '../hooks/useAdoration'
 
 const DOTS = [
   {x:.52,y:.33},{x:.5,y:.31},{x:.53,y:.35},{x:.54,y:.38},{x:.48,y:.32},{x:.51,y:.37},
@@ -10,24 +11,23 @@ const DOTS = [
   {x:.35,y:.60},{x:.33,y:.58},{x:.37,y:.62},{x:.30,y:.62},{x:.38,y:.58},{x:.32,y:.65},
   {x:.71,y:.55},{x:.69,y:.57},{x:.73,y:.53},{x:.68,y:.60},{x:.72,y:.50},{x:.74,y:.58},
 ]
+
 const COUNTRIES_DATA = [
-  { flag:'🇮🇹', name:'Italia',    n:3218 }, { flag:'🇵🇱', name:'Polonia',   n:2847 },
-  { flag:'🇵🇭', name:'Filippine', n:2104 }, { flag:'🇧🇷', name:'Brasile',   n:1983 },
-  { flag:'🇲🇽', name:'Messico',   n:1756 }, { flag:'🇺🇸', name:'USA',       n:1622 },
+  { flag:'🇮🇹', name:'Italia',    n:3218 },
+  { flag:'🇵🇱', name:'Polonia',   n:2847 },
+  { flag:'🇵🇭', name:'Filippine', n:2104 },
+  { flag:'🇧🇷', name:'Brasile',   n:1983 },
+  { flag:'🇲🇽', name:'Messico',   n:1756 },
+  { flag:'🇺🇸', name:'USA',       n:1622 },
 ]
 
 export function Catena() {
-  const { t } = useTranslation()
-  const canvasRef  = useRef<HTMLCanvasElement>(null)
-  const rafRef     = useRef<number>(0)
-  const [count,  setCount]  = useState(18427)
-  const [adoring, setAdoring] = useState(false)
+  const { t }    = useTranslation()
+  const { stats, adoring, toggle } = useAdoration()
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rafRef    = useRef<number>(0)
 
-  useEffect(() => {
-    const interval = setInterval(() => setCount(v => v + Math.floor(Math.sin(Date.now() / 9000) * 200 + Math.random() * 40 - 20)), 5000)
-    return () => clearInterval(interval)
-  }, [])
-
+  // Animazione canvas
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -66,25 +66,39 @@ export function Catena() {
 
   return (
     <div className="pg">
+      {/* Counter — reale da Supabase Realtime, DEMO se non configurato */}
       <div style={{ background:'linear-gradient(135deg,#08050a,#1a0e0e)', borderRadius:14, padding:'20px 16px', marginBottom:14, textAlign:'center', color:'#fff' }}>
-        <span style={{ fontFamily:'Cinzel,serif', fontSize:'2.5rem', color:'var(--gold)', display:'block', marginBottom:4 }}>{count.toLocaleString()}</span>
-        <div style={{ fontSize:'.78rem', opacity:.6, marginBottom:10 }}>{t('catena.people_before_jesus')}</div>
-        <div style={{ fontFamily:'Cinzel,serif', fontSize:'1rem', color:'var(--gold)', opacity:.8 }}>🌍 132 {t('catena.nations_united')}</div>
+        <span style={{ fontFamily:'Cinzel,serif', fontSize:'2.5rem', color:'var(--gold)', display:'block', marginBottom:4 }}>
+          {stats.isLoading ? '...' : stats.total.toLocaleString()}
+        </span>
+        <div style={{ fontSize:'.78rem', opacity:.6, marginBottom:6 }}>{t('catena.people_before_jesus')}</div>
+        {stats.isDemo && (
+          <div style={{ fontSize:'.62rem', color:'#f59e0b', marginBottom:6 }}>⚠️ [DEMO] — contatore reale si attiva dopo configurazione Supabase</div>
+        )}
+        <div style={{ fontFamily:'Cinzel,serif', fontSize:'1rem', color:'var(--gold)', opacity:.8 }}>
+          🌍 {stats.nations} {t('catena.nations_united')}
+        </div>
       </div>
 
+      {/* Canvas */}
       <canvas ref={canvasRef} style={{ width:'100%', borderRadius:12, display:'block', background:'#08050a', marginBottom:14 }} height={200} />
 
-      <button onClick={() => setAdoring(p => !p)} style={{ width:'100%', padding:14, background: adoring ? 'linear-gradient(135deg,#166534,#15803d)':'var(--red)', color:'#fff', border:'none', borderRadius:12, fontFamily:'Cinzel,serif', fontSize:'.88rem', letterSpacing:'.1em', cursor:'pointer', marginBottom:14, boxShadow:'0 4px 18px rgba(139,26,42,.35)' }}>
+      {/* CTA */}
+      <button onClick={toggle} style={{ width:'100%', padding:14, background: adoring ? 'linear-gradient(135deg,#166534,#15803d)':'var(--red)', color:'#fff', border:'none', borderRadius:12, fontFamily:'Cinzel,serif', fontSize:'.88rem', letterSpacing:'.1em', cursor:'pointer', marginBottom:14, boxShadow:'0 4px 18px rgba(139,26,42,.35)' }}>
         {adoring ? t('catena.adoring_active') : t('catena.adoring_btn')}
       </button>
 
+      {/* Info */}
       <div style={{ background:'var(--white)', border:'1px solid var(--br)', borderRadius:11, padding:'13px 14px', marginBottom:10, fontSize:'.82rem', color:'var(--t2)', lineHeight:1.6 }}>
         <div style={{ fontWeight:700, color:'var(--text)', marginBottom:4 }}>{t('catena.how_it_works')}</div>
         {t('catena.how_it_works_text')}
       </div>
 
+      {/* Paesi — [DEMO] nota */}
       <div style={{ background:'var(--white)', border:'1px solid var(--br)', borderRadius:11, padding:'13px 14px', marginBottom:14 }}>
-        <div style={{ fontWeight:700, color:'var(--text)', fontSize:'.85rem', marginBottom:10 }}>{t('catena.most_active')}</div>
+        <div style={{ fontWeight:700, color:'var(--text)', fontSize:'.85rem', marginBottom:8 }}>
+          {t('catena.most_active')} <span style={{ fontSize:'.6rem', color:'#f59e0b', fontWeight:400 }}>[DEMO]</span>
+        </div>
         {COUNTRIES_DATA.map(c => (
           <div key={c.name} style={{ display:'flex', justifyContent:'space-between', fontSize:'.78rem', padding:'5px 0', borderBottom:'1px solid var(--bg)', color:'var(--t2)' }}>
             <span>{c.flag} {c.name}</span>

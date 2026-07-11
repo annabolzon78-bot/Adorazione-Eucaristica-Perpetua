@@ -59,7 +59,10 @@ export function Dashboard() {
   }
 
   // ── Dev role switcher (solo quando non c'è token reale) ──────
-  const showRoleSwitcher = !localStorage.getItem('av_token') || localStorage.getItem('av_token') === 'mock'
+  // Selettore ruolo dev: visibile SOLO in development E senza token reale
+  const isDev = (import.meta as any).env?.DEV ?? false
+  const hasRealToken = !!localStorage.getItem('av_token') && localStorage.getItem('av_token') !== 'mock'
+  const showRoleSwitcher = isDev && !hasRealToken
 
   return (
     <>

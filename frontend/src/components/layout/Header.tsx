@@ -1,28 +1,30 @@
-import { useTranslation } from 'react-i18next'
+import { useTranslation }  from 'react-i18next'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { useAdoration }    from '../../hooks/useAdoration'
 
 export function Header() {
-  const { t } = useTranslation()
-
-  // Legge adoratori da store (fallback 18427)
-  const [adorersNow] = [18427]
+  const { t }    = useTranslation()
+  const { stats } = useAdoration()
 
   return (
     <header className="app-header">
       <div className="ah-logo">
-        <span style={{ fontSize:'1.4rem', animation:'hb 2s ease-in-out infinite' }}>❤️‍🔥</span>
+        <span style={{ fontSize:'1.4rem' }}>❤️‍🔥</span>
         <div>
           <div className="ah-logo-name">Adorazione Viva</div>
           <div className="ah-tagline">{t('header.tagline')}</div>
         </div>
       </div>
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-        <div className="ah-stats">
-          <div className="ah-stat">
-            <strong>{adorersNow.toLocaleString()}</strong>
-            {' '}{t('header.adorers_now')}
+        {!stats.isLoading && (
+          <div className="ah-stats">
+            <div className="ah-stat">
+              <strong>{stats.total.toLocaleString()}</strong>
+              {' '}{t('header.adorers_now')}
+              {stats.isDemo && <span style={{ fontSize:'.55rem', color:'#f59e0b', marginLeft:3 }}>[DEMO]</span>}
+            </div>
           </div>
-        </div>
+        )}
         <LanguageSwitcher />
       </div>
     </header>
