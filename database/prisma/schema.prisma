@@ -1,0 +1,1336 @@
+// =============================================================
+//  ADORAZIONE VIVA — Prisma Schema  v2.0
+//  PostgreSQL + Prisma ORM
+//  27 modelli · 15 enum · 100+ indici
+// =============================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [uuidOssp(map: "uuid-ossp"), pgTrgm(map: "pg_trgm")]
+}
+
+// =============================================================
+//  ENUM
+// =============================================================
+
+enum Role {
+  USER
+  PARISH_ADMIN
+  DIOCESE_ADMIN
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum AdorationType {
+  PERPETUA
+  GIORNALIERA
+  SETTIMANALE
+  MENSILE
+  OCCASIONALE
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+enum NotificationType {
+  SHIFT_REMINDER
+  NEW_INTENTION
+  PARISH_UPDATE
+  EVENT_REMINDER
+  SYSTEM
+  SPIRITUAL_CHALLENGE
+  ADORATION_REMINDER
+}
+
+enum MassRite {
+  ROMANO
+  AMBROSIANO
+  TRIDENTINO
+  ORIENTALE
+  ALTRO
+}
+
+enum StreamType {
+  YOUTUBE_LIVE      // YouTube Live stream per ID video
+  YOUTUBE_CHANNEL   // Canale YouTube (prende il live corrente)
+  VIMEO             // Vimeo Live o VOD
+  HLS               // Stream HLS diretto (.m3u8)
+  RTSP              // RTSP (richiede proxy backend)
+  FACEBOOK_LIVE     // Facebook Live
+  TWITCH            // Twitch
+  CUSTOM_EMBED      // HTML embed personalizzato
+}
+
+enum StreamLanguage {
+  IT  // Italiano
+  EN  // English
+  ES  // Español
+  FR  // Français
+  PT  // Português
+  DE  // Deutsch
+  PL  // Polski
+  LA  // Latina
+  AR  // العربية
+  ZH  // 中文
+  JA  // 日本語
+  KO  // 한국어
+  OTHER
+}
+
+enum Continent {
+  EUROPA
+  AMERICA_NORD
+  AMERICA_SUD
+  AFRICA
+  ASIA
+  OCEANIA
+  MEDIO_ORIENTE
+}
+
+enum StreamStatus {
+  ACTIVE
+  OFFLINE
+  SCHEDULED
+  UNKNOWN
+}
+
+enum MiracleVerificationLevel {
+  STORICO
+  DIOCESANO
+  PONTIFICIO
+  SCIENTIFICO
+}
+
+enum JournalMood {
+  PACE
+  GIOIA
+  DOLORE
+  ARIDITA
+  GRATITUDINE
+  ADORAZIONE
+  PENITENZA
+  SPERANZA
+}
+
+enum PilgrimageType {
+  MARIANO
+  EUCARISTICO
+  CRISTOLOGICO
+  AGIOGRAFICO
+  DIOCESANO
+}
+
+enum EventType {
+  ADORAZIONE_SPECIALE
+  PELLEGRINAGGIO
+  RITIRO
+  CONFERENZA
+  VEGLIA
+  PROCESSIONE
+  SETTIMANA_EUCARISTICA
+  ALTRO
+}
+
+enum FavoriteType {
+  CHAPEL
+  PRAYER
+  MIRACLE
+  PILGRIMAGE
+  PARISH
+  SAINT
+  QUOTE
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  INTERRUPTED
+}
+
+enum SaintCategory {
+  APOSTOLO
+  MARTIRE
+  CONFESSORE
+  DOTTORE
+  PAPA
+  VERGINE
+  FONDATORE
+  VESCOVO
+  SACERDOTE
+  LAICO
+  MONACO
+  PROFETA
+}
+
+enum QuoteSource {
+  SANTO
+  PAPA
+  SCRITTURA
+  CONCILIO
+  DOTTORE
+  BEATO
+}
+
+// =============================================================
+//  1. LANGUAGES
+// =============================================================
+
+model Language {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  nativeName  String
+  isActive    Boolean  @default(true)
+  isRtl       Boolean  @default(false)
+  flagEmoji   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  translations Translation[]
+  users        User[]
+  prayers      Prayer[]
+  quotes       EucharisticQuote[]
+
+  @@index([code])
+  @@map("languages")
+}
+
+// =============================================================
+//  2. TRANSLATIONS
+// =============================================================
+
+model Translation {
+  id         String   @id @default(cuid())
+  language   Language @relation(fields: [languageId], references: [id])
+  languageId String
+  namespace  String
+  key        String
+  value      String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([languageId, namespace, key])
+  @@index([languageId])
+  @@index([namespace])
+  @@index([key])
+  @@map("translations")
+}
+
+// =============================================================
+//  3. COUNTRIES
+// =============================================================
+
+model Country {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  code3       String   @unique
+  nameIt      String
+  nameEn      String
+  continent   String
+  flagEmoji   String?
+  callingCode String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cities    City[]
+  dioceses  Diocese[]
+  parishes  Parish[]
+  chapels   Chapel[]
+  users     User[]
+  miracles  EucharisticMiracle[]
+  pilgrims  Pilgrimage[]
+  saints    Saint[]
+  events    Event[]
+
+  @@index([code])
+  @@index([continent])
+  @@map("countries")
+}
+
+// =============================================================
+//  4. CITIES
+// =============================================================
+
+model City {
+  id         String   @id @default(cuid())
+  name       String
+  region     String?
+  country    Country  @relation(fields: [countryId], references: [id])
+  countryId  String
+  lat        Float?
+  lng        Float?
+  population Int?
+  timezone   String?
+  isCapital  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  dioceses   Diocese[]
+  parishes   Parish[]
+  chapels    Chapel[]
+  events     Event[]
+  pilgrims   Pilgrimage[]
+  saints     Saint[]
+
+  @@unique([name, countryId])
+  @@index([countryId])
+  @@index([lat, lng])
+  @@map("cities")
+}
+
+// =============================================================
+//  5. DIOCESES
+// =============================================================
+
+model Diocese {
+  id            String   @id @default(cuid())
+  name          String
+  latinName     String?
+  bishopName    String?
+  websiteUrl    String?
+  email         String?
+  phone         String?
+  address       String?
+  lat           Float?
+  lng           Float?
+  country       Country  @relation(fields: [countryId], references: [id])
+  countryId     String
+  city          City?    @relation(fields: [cityId], references: [id])
+  cityId        String?
+  isArchdiocese Boolean  @default(false)
+  foundedYear   Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  parishes Parish[]
+
+  @@index([countryId])
+  @@index([cityId])
+  @@map("dioceses")
+}
+
+// =============================================================
+//  6. RELIGIOUS ORDERS
+// =============================================================
+
+model ReligiousOrder {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  abbreviation String?
+  founder      String?
+  foundedYear  Int?
+  foundedCity  String?
+  charism      String?  @db.Text
+  websiteUrl   String?
+  logoUrl      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  parishes Parish[]
+  chapels  Chapel[]
+  saints   Saint[]
+
+  @@map("religious_orders")
+}
+
+// =============================================================
+//  7. SAINTS  ← NUOVO
+// =============================================================
+
+model Saint {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  fullName         String?
+  category         SaintCategory
+  biography        String        @db.Text
+  shortBio         String?       @db.Text
+  birthYear        Int?
+  deathYear        Int?
+  feastDay         String?       // "MM-DD"
+  canonizationYear Int?
+  canonizedBy      String?       // Papa che l'ha canonizzato
+  beatifiedYear    Int?
+  patronOf         String[]      // ["Adoratori Eucaristici", "Italia"]
+  isEucharisticSaint Boolean     @default(false)
+  imageUrl         String?
+  thumbnailUrl     String?
+  birthCountry     Country?      @relation(fields: [birthCountryId], references: [id])
+  birthCountryId   String?
+  birthCity        City?         @relation(fields: [birthCityId], references: [id])
+  birthCityId      String?
+  religiousOrder   ReligiousOrder? @relation(fields: [religiousOrderId], references: [id])
+  religiousOrderId String?
+  isPublished      Boolean       @default(true)
+  viewCount        Int           @default(0)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  prayers    Prayer[]
+  quotes     EucharisticQuote[]
+  miracles   EucharisticMiracle[]  @relation("MiracleSaint")
+  pilgrimages Pilgrimage[]         @relation("PilgrimageSaint")
+  favorites  Favorite[]            @relation("SaintFavorite")
+
+  @@index([slug])
+  @@index([category])
+  @@index([isEucharisticSaint])
+  @@index([isPublished])
+  @@index([birthCountryId])
+  @@map("saints")
+}
+
+// =============================================================
+//  8. EUCHARISTIC QUOTES  ← NUOVO
+// =============================================================
+
+model EucharisticQuote {
+  id          String      @id @default(cuid())
+  text        String      @db.Text
+  source      QuoteSource
+  saint       Saint?      @relation(fields: [saintId], references: [id])
+  saintId     String?
+  authorName  String?     // se non è un Santo catalogato
+  reference   String?     // "Trattato sull'Eucaristia, cap. 3"
+  language    Language    @relation(fields: [languageId], references: [id])
+  languageId  String
+  tags        String[]    // ["adorazione", "presenza-reale", "amore"]
+  isFeatured  Boolean     @default(false)
+  isPublished Boolean     @default(true)
+  viewCount   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  favorites Favorite[] @relation("QuoteFavorite")
+
+  @@index([saintId])
+  @@index([languageId])
+  @@index([isFeatured])
+  @@index([isPublished])
+  @@map("eucharistic_quotes")
+}
+
+// =============================================================
+//  9. USERS
+// =============================================================
+
+model User {
+  id                   String   @id @default(cuid())
+  email                String   @unique
+  passwordHash         String
+  name                 String
+  displayName          String?
+  avatarUrl            String?
+  bio                  String?  @db.Text
+  role                 Role     @default(USER)
+  country              Country? @relation(fields: [countryId], references: [id])
+  countryId            String?
+  city                 String?
+  language             Language? @relation(fields: [languageId], references: [id])
+  languageId           String?
+  timezone             String?
+  phone                String?
+  isActive             Boolean  @default(true)
+  isEmailVerified      Boolean  @default(false)
+  emailVerifiedAt      DateTime?
+  lastLoginAt          DateTime?
+  adoringNow           Boolean  @default(false)
+  totalAdorationHours  Float    @default(0)
+  currentStreak        Int      @default(0)
+  longestStreak        Int      @default(0)
+  deletedAt            DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  managedParishes     Parish[]            @relation("ParishAdmin")
+  adorationSessions   AdorationSession[]
+  prayerRequests      PrayerRequest[]
+  testimonials        Testimonial[]
+  notifications       Notification[]
+  favorites           Favorite[]
+  visits              UserVisit[]
+  journal             SpiritualJournal[]
+  bookedShifts        AdorationSchedule[] @relation("ShiftBooker")
+
+  @@index([email])
+  @@index([countryId])
+  @@index([role])
+  @@index([adoringNow])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+// =============================================================
+//  10. PARISHES
+// =============================================================
+
+model Parish {
+  id                    String             @id @default(cuid())
+  name                  String
+  officialName          String?
+  description           String?            @db.Text
+  address               String
+  postalCode            String?
+  lat                   Float
+  lng                   Float
+  country               Country            @relation(fields: [countryId], references: [id])
+  countryId             String
+  city                  City               @relation(fields: [cityId], references: [id])
+  cityId                String
+  diocese               Diocese?           @relation(fields: [dioceseId], references: [id])
+  dioceseId             String?
+  religiousOrder        ReligiousOrder?    @relation(fields: [religiousOrderId], references: [id])
+  religiousOrderId      String?
+  admin                 User?              @relation("ParishAdmin", fields: [adminId], references: [id])
+  adminId               String?
+  pastorName            String?
+  email                 String?
+  phone                 String?
+  websiteUrl            String?
+  facebookUrl           String?
+  instagramUrl          String?
+  logoUrl               String?
+  coverImageUrl         String?
+  status                VerificationStatus @default(PENDING)
+  verifiedAt            DateTime?
+  hasAdoration          Boolean            @default(false)
+  hasPerpetualAdoration Boolean            @default(false)
+  hasLiveStream         Boolean            @default(false)
+  hasConfessions        Boolean            @default(false)
+  isAccessible          Boolean            @default(false)
+  parkingAvailable      Boolean            @default(false)
+  foundedYear           Int?
+  patronSaint           String?
+  feastDay              String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  chapels            Chapel[]
+  events             Event[]
+  massSchedules      MassSchedule[]
+  confessionSchedules ConfessionSchedule[]
+  testimonials       Testimonial[]
+  liveStreams         LiveStream[]
+  favorites          Favorite[]           @relation("ParishFavorite")
+
+  @@index([countryId])
+  @@index([cityId])
+  @@index([dioceseId])
+  @@index([lat, lng])
+  @@index([status])
+  @@index([hasAdoration])
+  @@map("parishes")
+}
+
+// =============================================================
+//  11. CHAPELS
+// =============================================================
+
+model Chapel {
+  id               String             @id @default(cuid())
+  name             String
+  description      String?            @db.Text
+  address          String
+  lat              Float
+  lng              Float
+  country          Country            @relation(fields: [countryId], references: [id])
+  countryId        String
+  city             City?              @relation(fields: [cityId], references: [id])
+  cityId           String?
+  parish           Parish?            @relation(fields: [parishId], references: [id])
+  parishId         String?
+  religiousOrder   ReligiousOrder?    @relation(fields: [religiousOrderId], references: [id])
+  religiousOrderId String?
+  adorationType    AdorationType
+  status           VerificationStatus @default(PENDING)
+  verifiedAt       DateTime?
+  is24h            Boolean            @default(false)
+  isOpenNow        Boolean            @default(false)
+  hasLiveStream    Boolean            @default(false)
+  hasConfessions   Boolean            @default(false)
+  isAccessible     Boolean            @default(false)
+  hasParkingNearby Boolean            @default(false)
+  seatingCapacity  Int?
+  phone            String?
+  email            String?
+  websiteUrl       String?
+  imageUrl         String?
+  openingYear      Int?
+  patronSaint      String?
+  totalVisits      Int                @default(0)
+  deletedAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  schedules AdorationSchedule[]
+  streams   LiveStream[]
+  visits    UserVisit[]
+  sessions  AdorationSession[]
+  favorites Favorite[]          @relation("ChapelFavorite")
+
+  @@index([countryId])
+  @@index([cityId])
+  @@index([parishId])
+  @@index([lat, lng])
+  @@index([adorationType])
+  @@index([status])
+  @@index([is24h])
+  @@index([isOpenNow])
+  @@index([deletedAt])
+  @@map("chapels")
+}
+
+// =============================================================
+//  12. ADORATION SCHEDULES
+// =============================================================
+
+model AdorationSchedule {
+  id           String    @id @default(cuid())
+  chapel       Chapel    @relation(fields: [chapelId], references: [id], onDelete: Cascade)
+  chapelId     String
+  dayOfWeek    Int?
+  specificDate DateTime?
+  startTime    String
+  endTime      String
+  isAvailable  Boolean   @default(true)
+  isRecurring  Boolean   @default(true)
+  notes        String?
+  booker       User?     @relation("ShiftBooker", fields: [bookerId], references: [id])
+  bookerId     String?
+  bookedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([chapelId])
+  @@index([dayOfWeek])
+  @@index([isAvailable])
+  @@index([bookerId])
+  @@index([specificDate])
+  @@map("adoration_schedules")
+}
+
+// =============================================================
+//  13. ADORATION SESSIONS
+// =============================================================
+
+model AdorationSession {
+  id          String        @id @default(cuid())
+  user        User          @relation(fields: [userId], references: [id])
+  userId      String
+  chapel      Chapel?       @relation(fields: [chapelId], references: [id])
+  chapelId    String?
+  status      SessionStatus @default(ACTIVE)
+  startedAt   DateTime      @default(now())
+  endedAt     DateTime?
+  durationMin Int?
+  isVirtual   Boolean       @default(false)
+  lat         Float?
+  lng         Float?
+  notes       String?       @db.Text
+  offeredFor  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([chapelId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("adoration_sessions")
+}
+
+// =============================================================
+//  14. LIVE STREAMS
+// =============================================================
+
+model LiveStream {
+  id              String         @id @default(cuid())
+  // Relazioni principali
+  chapel          Chapel?        @relation(fields: [chapelId], references: [id])
+  chapelId        String?
+  parish          Parish?        @relation(fields: [parishId], references: [id])
+  parishId        String?
+  // Identificazione
+  title           String
+  description     String?        @db.Text
+  type            StreamType
+  status          StreamStatus   @default(UNKNOWN)
+  // URL e embed
+  url             String         // URL originale (es. youtube.com/live/xxx)
+  embedUrl        String?        // URL per iframe (es. youtube.com/embed/xxx)
+  embedHtml       String?        @db.Text  // HTML embed personalizzato (CUSTOM_EMBED)
+  channelId       String?        // YouTube channel ID, Vimeo channel ID
+  videoId         String?        // ID del video/stream
+  hlsUrl          String?        // URL diretto .m3u8 (HLS)
+  rtspUrl         String?        // URL RTSP (usato lato backend)
+  // Metadati
+  language        StreamLanguage @default(IT)
+  continent       Continent
+  thumbnailUrl    String?
+  tags            String[]
+  // Stato e metriche
+  isDefault       Boolean        @default(false)
+  isActive        Boolean        @default(true)
+  isFeatured      Boolean        @default(false)
+  viewerCount     Int?
+  totalViews      Int            @default(0)
+  lastCheckedAt   DateTime?
+  lastOnlineAt    DateTime?
+  // Contatto
+  contactEmail    String?
+  websiteUrl      String?
+  // Timestamp
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  schedules StreamSchedule[]
+
+  @@index([chapelId])
+  @@index([parishId])
+  @@index([status])
+  @@index([type])
+  @@index([language])
+  @@index([continent])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@map("live_streams")
+}
+
+// =============================================================
+//  STREAM SCHEDULES — Orari ricorrenti dello streaming
+// =============================================================
+
+model StreamSchedule {
+  id          String     @id @default(cuid())
+  stream      LiveStream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  streamId    String
+  dayOfWeek   Int?       // 0=Dom...6=Sab, null = evento specifico
+  specificDate DateTime?
+  startTime   String     // "HH:MM"
+  endTime     String     // "HH:MM"
+  timezone    String     @default("Europe/Rome")
+  notes       String?
+  isRecurring Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([streamId])
+  @@index([dayOfWeek])
+  @@map("stream_schedules")
+}
+
+// =============================================================
+//  15. MASS SCHEDULES
+// =============================================================
+
+model MassSchedule {
+  id           String    @id @default(cuid())
+  parish       Parish    @relation(fields: [parishId], references: [id], onDelete: Cascade)
+  parishId     String
+  dayOfWeek    Int?
+  specificDate DateTime?
+  time         String
+  language     String?
+  rite         MassRite  @default(ROMANO)
+  isSolemn     Boolean   @default(false)
+  notes        String?
+  validFrom    DateTime?
+  validUntil   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([parishId])
+  @@index([dayOfWeek])
+  @@map("mass_schedules")
+}
+
+// =============================================================
+//  16. CONFESSION SCHEDULES  (rinominato da Confession)
+// =============================================================
+
+model ConfessionSchedule {
+  id            String    @id @default(cuid())
+  parish        Parish    @relation(fields: [parishId], references: [id], onDelete: Cascade)
+  parishId      String
+  dayOfWeek     Int?
+  specificDate  DateTime?
+  startTime     String
+  endTime       String
+  languages     String[]
+  byAppointment Boolean   @default(false)
+  phone         String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([parishId])
+  @@index([dayOfWeek])
+  @@map("confession_schedules")
+}
+
+// =============================================================
+//  17. EUCHARISTIC MIRACLES
+// =============================================================
+
+model EucharisticMiracle {
+  id                        String                   @id @default(cuid())
+  title                     String
+  slug                      String                   @unique
+  // Localizzazione
+  location                  String
+  city                      String?
+  state                     String?              // Regione/stato/provincia
+  continent                 Continent            // Continente
+  country                   Country?             @relation(fields: [countryId], references: [id])
+  countryId                 String?
+  lat                       Float?
+  lng                       Float?
+  // Temporale
+  year                      Int?
+  yearCa                    String?              // "VIII sec.", "1247 ca."
+  // Classificazione
+  verificationLevel         MiracleVerificationLevel
+  // Descrizioni
+  summary                   String               @db.Text
+  fullDescription           String               @db.Text
+  context                   String?              @db.Text  // Contesto storico
+  miracle                   String?              @db.Text  // Cosa è successo esattamente
+  aftermath                 String?              @db.Text  // Conseguenze e storia successiva
+  // Analisi scientifica
+  scientificAnalysis        String?              @db.Text
+  tissueType                String?
+  bloodType                 String?
+  analyzedBy                String?
+  analysisYear              Int?
+  analysisInstitution       String?
+  // Riconoscimento ecclesiastico
+  ecclesiasticalRecognition String?              @db.Text  // Dettagliato
+  officialRecognition       String?              // Breve
+  recognizedBy              String?              // Chi ha riconosciuto (vescovo, papa...)
+  recognitionYear           Int?
+  // Venerazione
+  isVisitableToday          Boolean              @default(false)
+  visitingInfo              String?
+  conservedAt               String?
+  openingHours              String?
+  entryFee                  String?
+  accessInfo                String?
+  // Media
+  imageUrl                  String?
+  thumbnailUrl              String?
+  // Fonti
+  sources                   String[]
+  // Ordinamento
+  featuredOrder             Int?
+  isPublished               Boolean              @default(true)
+  viewCount                 Int                  @default(0)
+  // Relazioni
+  saints                    Saint[]              @relation("MiracleSaint")
+  images                    MiracleImage[]
+  videos                    MiracleVideo[]
+  documents                 MiracleDocument[]
+  bibliography              MiracleBibliography[]
+  pilgrimages               MiraclePilgrimage[]
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+
+  favorites Favorite[] @relation("MiracleFavorite")
+
+  @@index([countryId])
+  @@index([continent])
+  @@index([verificationLevel])
+  @@index([year])
+  @@index([isPublished])
+  @@index([slug])
+  @@map("eucharistic_miracles")
+}
+
+// =============================================================
+//  18. PILGRIMAGES
+// =============================================================
+
+model Pilgrimage {
+  id             String         @id @default(cuid())
+  name           String
+  slug           String         @unique
+  type           PilgrimageType
+  description    String         @db.Text
+  location       String
+  country        Country?       @relation(fields: [countryId], references: [id])
+  countryId      String?
+  city           City?          @relation(fields: [cityId], references: [id])
+  cityId         String?
+  lat            Float?
+  lng            Float?
+  websiteUrl     String?
+  imageUrl       String?
+  apparitionYear Int?
+  feastDay       String?
+  isUnescoSite   Boolean        @default(false)
+  annualVisitors Int?
+  hasAdoration   Boolean        @default(true)
+  hasLiveStream  Boolean        @default(false)
+  streamUrl      String?
+  accessInfo     String?
+  isPublished    Boolean        @default(true)
+  // Santo a cui è dedicato il luogo
+  saints         Saint[]        @relation("PilgrimageSaint")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  favorites Favorite[] @relation("PilgrimageFavorite")
+
+  @@index([countryId])
+  @@index([cityId])
+  @@index([type])
+  @@index([lat, lng])
+  @@index([isPublished])
+  @@map("pilgrimages")
+}
+
+// =============================================================
+//  19. PRAYER CATEGORIES
+// =============================================================
+
+model PrayerCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  prayers Prayer[]
+
+  @@index([slug])
+  @@index([sortOrder])
+  @@map("prayer_categories")
+}
+
+// =============================================================
+//  20. PRAYERS
+// =============================================================
+
+model Prayer {
+  id           String         @id @default(cuid())
+  title        String
+  slug         String         @unique
+  category     PrayerCategory @relation(fields: [categoryId], references: [id])
+  categoryId   String
+  language     Language       @relation(fields: [languageId], references: [id])
+  languageId   String
+  originalText String         @db.Text
+  latinText    String?        @db.Text
+  // Autore come FK se è un Santo catalogato
+  saint        Saint?         @relation(fields: [saintId], references: [id])
+  saintId      String?
+  // Autore come stringa libera (per non-santi o antichi)
+  authorName   String?
+  century      String?
+  origin       String?
+  notes        String?        @db.Text
+  audioUrl     String?
+  isTraditional Boolean       @default(false)
+  isLiturgical  Boolean       @default(false)
+  viewCount    Int            @default(0)
+  sortOrder    Int            @default(0)
+  isPublished  Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  favorites Favorite[] @relation("PrayerFavorite")
+
+  @@index([categoryId])
+  @@index([languageId])
+  @@index([saintId])
+  @@index([slug])
+  @@index([isPublished])
+  @@map("prayers")
+}
+
+// =============================================================
+//  21. PRAYER REQUESTS (intenzioni)
+// =============================================================
+
+model PrayerRequest {
+  id          String   @id @default(cuid())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  authorName  String?
+  isAnonymous Boolean  @default(false)
+  text        String   @db.Text
+  category    String?
+  prayerCount Int      @default(0)
+  isPublic    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isPublic])
+  @@index([isFeatured])
+  @@index([prayerCount])
+  @@index([createdAt])
+  @@map("prayer_requests")
+}
+
+// =============================================================
+//  22. TESTIMONIALS
+// =============================================================
+
+model Testimonial {
+  id            String             @id @default(cuid())
+  user          User?              @relation(fields: [userId], references: [id])
+  userId        String?
+  parish        Parish?            @relation(fields: [parishId], references: [id])
+  parishId      String?
+  authorName    String
+  authorCity    String?
+  authorCountry String?
+  title         String?
+  text          String             @db.Text
+  isAnonymous   Boolean            @default(false)
+  status        VerificationStatus @default(PENDING)
+  isFeatured    Boolean            @default(false)
+  approvedAt    DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([parishId])
+  @@index([status])
+  @@index([isFeatured])
+  @@map("testimonials")
+}
+
+// =============================================================
+//  23. EVENTS
+// =============================================================
+
+model Event {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  type            EventType
+  description     String    @db.Text
+  parish          Parish?   @relation(fields: [parishId], references: [id])
+  parishId        String?
+  country         Country?  @relation(fields: [countryId], references: [id])
+  countryId       String?
+  city            City?     @relation(fields: [cityId], references: [id])
+  cityId          String?
+  address         String?
+  lat             Float?
+  lng             Float?
+  startDate       DateTime
+  endDate         DateTime?
+  startTime       String?
+  endTime         String?
+  imageUrl        String?
+  websiteUrl      String?
+  registrationUrl String?
+  maxAttendees    Int?
+  isFree          Boolean   @default(true)
+  price           Float?
+  currency        String?   @default("EUR")
+  organizer       String?
+  contactEmail    String?
+  isPublished     Boolean   @default(true)
+  isFeatured      Boolean   @default(false)
+  viewCount       Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([parishId])
+  @@index([countryId])
+  @@index([cityId])
+  @@index([type])
+  @@index([startDate])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@index([lat, lng])
+  @@map("events")
+}
+
+// =============================================================
+//  24. NOTIFICATIONS
+// =============================================================
+
+model Notification {
+  id          String           @id @default(cuid())
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  type        NotificationType
+  title       String
+  body        String
+  data        Json?
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  isSent      Boolean          @default(false)
+  sentAt      DateTime?
+  scheduledAt DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([isRead])
+  @@index([isSent])
+  @@index([scheduledAt])
+  @@map("notifications")
+}
+
+// =============================================================
+//  25. FAVORITES
+// =============================================================
+
+model Favorite {
+  id               String       @id @default(cuid())
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  type             FavoriteType
+  chapel           Chapel?      @relation("ChapelFavorite",     fields: [chapelId],      references: [id])
+  chapelId         String?
+  prayer           Prayer?      @relation("PrayerFavorite",     fields: [prayerId],      references: [id])
+  prayerId         String?
+  miracle          EucharisticMiracle? @relation("MiracleFavorite",   fields: [miracleId],     references: [id])
+  miracleId        String?
+  pilgrimage       Pilgrimage?  @relation("PilgrimageFavorite", fields: [pilgrimageId],  references: [id])
+  pilgrimageId     String?
+  parish           Parish?      @relation("ParishFavorite",     fields: [parishId],      references: [id])
+  parishId         String?
+  saint            Saint?       @relation("SaintFavorite",      fields: [saintId],       references: [id])
+  saintId          String?
+  quote            EucharisticQuote? @relation("QuoteFavorite", fields: [quoteId],       references: [id])
+  quoteId          String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@unique([userId, chapelId])
+  @@unique([userId, prayerId])
+  @@unique([userId, miracleId])
+  @@unique([userId, pilgrimageId])
+  @@unique([userId, parishId])
+  @@unique([userId, saintId])
+  @@unique([userId, quoteId])
+  @@index([userId])
+  @@index([type])
+  @@map("favorites")
+}
+
+// =============================================================
+//  26. USER VISITS
+// =============================================================
+
+model UserVisit {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  chapel      Chapel?  @relation(fields: [chapelId], references: [id])
+  chapelId    String?
+  visitedAt   DateTime @default(now())
+  durationMin Int?
+  isVirtual   Boolean  @default(false)
+  lat         Float?
+  lng         Float?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([chapelId])
+  @@index([visitedAt])
+  @@map("user_visits")
+}
+
+// =============================================================
+//  27. SPIRITUAL JOURNAL
+// =============================================================
+
+model SpiritualJournal {
+  id           String      @id @default(cuid())
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  date         DateTime    @default(now())
+  title        String?
+  text         String      @db.Text
+  mood         JournalMood?
+  adorationMin Int?
+  isPrivate    Boolean     @default(true)
+  tags         String[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([date])
+  @@index([mood])
+  @@map("spiritual_journal")
+}
+
+
+// =============================================================
+//  MIRACLE IMAGES
+// =============================================================
+
+model MiracleImage {
+  id          String             @id @default(cuid())
+  miracle     EucharisticMiracle @relation(fields: [miracleId], references: [id], onDelete: Cascade)
+  miracleId   String
+  url         String
+  caption     String?
+  credit      String?
+  altText     String?
+  width       Int?
+  height      Int?
+  isCover     Boolean            @default(false)
+  sortOrder   Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([miracleId])
+  @@map("miracle_images")
+}
+
+// =============================================================
+//  MIRACLE VIDEOS
+// =============================================================
+
+model MiracleVideo {
+  id          String             @id @default(cuid())
+  miracle     EucharisticMiracle @relation(fields: [miracleId], references: [id], onDelete: Cascade)
+  miracleId   String
+  title       String
+  url         String             // URL originale
+  embedUrl    String?            // URL embed
+  platform    String             // YOUTUBE, VIMEO, OTHER
+  videoId     String?
+  description String?
+  duration    Int?               // secondi
+  language    String?
+  sortOrder   Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([miracleId])
+  @@map("miracle_videos")
+}
+
+// =============================================================
+//  MIRACLE DOCUMENTS
+// =============================================================
+
+model MiracleDocument {
+  id          String             @id @default(cuid())
+  miracle     EucharisticMiracle @relation(fields: [miracleId], references: [id], onDelete: Cascade)
+  miracleId   String
+  title       String
+  description String?
+  url         String
+  fileType    String             // PDF, DOC, JPG, etc.
+  fileSize    Int?               // bytes
+  language    String?
+  year        Int?
+  author      String?
+  isPublic    Boolean            @default(true)
+  sortOrder   Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([miracleId])
+  @@map("miracle_documents")
+}
+
+// =============================================================
+//  MIRACLE BIBLIOGRAPHY
+// =============================================================
+
+model MiracleBibliography {
+  id          String             @id @default(cuid())
+  miracle     EucharisticMiracle @relation(fields: [miracleId], references: [id], onDelete: Cascade)
+  miracleId   String
+  authors     String             // "Linoli O., Bertagnoli P."
+  title       String
+  publisher   String?
+  year        Int?
+  journal     String?            // per articoli scientifici
+  volume      String?
+  pages       String?
+  isbn        String?
+  doi         String?
+  url         String?
+  type        String             // BOOK, ARTICLE, THESIS, WEB, DOCUMENT
+  language    String?
+  notes       String?
+  sortOrder   Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([miracleId])
+  @@map("miracle_bibliography")
+}
+
+// =============================================================
+//  MIRACLE PILGRIMAGES — Pellegrinaggi collegati
+// =============================================================
+
+model MiraclePilgrimage {
+  id          String             @id @default(cuid())
+  miracle     EucharisticMiracle @relation(fields: [miracleId], references: [id], onDelete: Cascade)
+  miracleId   String
+  name        String
+  description String?            @db.Text
+  location    String
+  lat         Float?
+  lng         Float?
+  websiteUrl  String?
+  contactEmail String?
+  phone       String?
+  organizer   String?
+  frequency   String?            // "Annuale", "Mensile", "24 ottobre"
+  nextDate    DateTime?
+  imageUrl    String?
+  sortOrder   Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([miracleId])
+  @@map("miracle_pilgrimages")
+}
+
+// =============================================================
+//  28. GLOBAL STATS (singleton)
+// =============================================================
+
+model GlobalStat {
+  id         String   @id @default("singleton")
+  adorersNow Int      @default(0)
+  nationsNow Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@map("global_stats")
+}
+
+// =============================================================
+//  TABELLE DI GIUNZIONE MANY-TO-MANY
+//  (gestite da Prisma come relazioni implicite)
+//
+//  Saint ←→ EucharisticMiracle  via "_MiracleSaint"
+//  Saint ←→ Pilgrimage           via "_PilgrimageSaint"
+// =============================================================
