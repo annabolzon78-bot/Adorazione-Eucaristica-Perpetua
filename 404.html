@@ -4,11 +4,9 @@
   <meta charset="utf-8">
   <title>Adorazione Viva</title>
   <script>
-    // GitHub Pages SPA redirect: conserva il path e reindirizza a index.html
-    var seg = window.location.pathname.replace(/\/adorazione-viva/, '') || '/'
+    var seg = window.location.pathname.replace(/^\/adorazione-viva/, '') || '/'
     window.location.replace(
       window.location.origin + '/adorazione-viva/?p=' + encodeURIComponent(seg) +
-      (window.location.search ? '&' + window.location.search.slice(1) : '') +
       window.location.hash
     )
   </script>
