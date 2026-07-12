@@ -41,7 +41,7 @@ export function StreamPlayer({ stream, autoplay = true }: Props) {
 
   // ── YouTube / Vimeo ──────────────────────────────────────
   if (stream.type === 'YOUTUBE_LIVE' || stream.type === 'YOUTUBE_CHANNEL') {
-    const src = stream.embedUrl ?? `https://www.youtube.com/embed/${stream.videoId}?autoplay=${autoplay ? 1 : 0}&rel=0&modestbranding=1`
+    const src = stream.embedUrl ?? `https://www.youtube-nocookie.com/embed/${stream.videoId}?autoplay=${autoplay ? 1 : 0}&rel=0&modestbranding=1`
     return (
       <div className="player-wrap">
         <iframe

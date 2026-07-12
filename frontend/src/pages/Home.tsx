@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 const STREAMS = [
-  'https://www.youtube.com/embed/hMNLrStmcTs?autoplay=1&rel=0&modestbranding=1',
-  'https://www.youtube.com/embed/GlGkFWPKomU?autoplay=1&rel=0&modestbranding=1',
+  'https://www.youtube-nocookie.com/embed/hMNLrStmcTs?autoplay=1&rel=0&modestbranding=1',
+  'https://www.youtube-nocookie.com/embed/GlGkFWPKomU?autoplay=1&rel=0&modestbranding=1',
 ]
 
 export function Home() {
