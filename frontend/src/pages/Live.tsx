@@ -1,19 +1,15 @@
 import { useState } from 'react'
-import { StreamCard }    from '../components/streaming/StreamCard'
-import { StreamFilters } from '../components/streaming/StreamFilters'
 import { StreamPlayer }  from '../components/streaming/StreamPlayer'
-import { useStreams, type StreamData, type StreamFilter } from '../hooks/useStreams'
+import { useStreams, type StreamData } from '../hooks/useStreams'
 import '../styles/streaming.css'
 
 export function Live() {
-  const [filter, setFilter]           = useState<StreamFilter>({})
-  const [selected, setSelected]       = useState<StreamData | null>(null)
+  const [selected, setSelected] = useState<StreamData | null>(null)
 
-  const { streams, loading, total } = useStreams(filter)
+  const { streams } = useStreams({})
 
   // Featured in cima
   const featured = streams.filter(s => s.isFeatured && s.status === 'ACTIVE')
-  const rest      = streams.filter(s => !s.isFeatured || s.status !== 'ACTIVE')
 
   return (
     <div className="live-page">
@@ -101,35 +97,6 @@ export function Live() {
         )
       )}
 
-      {/* ── FILTRI ── */}
-      <StreamFilters filter={filter} setFilter={setFilter} total={total} loading={loading} />
-
-      {/* ── GRIGLIA STREAM ── */}
-      <div className="live-grid-section">
-        {loading ? (
-          <div className="live-loading">
-            <span>❤️‍🔥</span>
-            <span>Caricamento stream...</span>
-          </div>
-        ) : streams.length === 0 ? (
-          <div className="live-empty">
-            <div className="live-empty-ico">📡</div>
-            <div className="live-empty-text">Nessuno stream trovato con questi filtri.</div>
-            <button className="live-empty-reset" onClick={() => setFilter({})}>Rimuovi filtri</button>
-          </div>
-        ) : (
-          <div className="live-grid">
-            {(selected ? rest : streams).map(stream => (
-              <StreamCard
-                key={stream.id}
-                stream={stream}
-                onClick={(s) => setSelected(s)}
-                isSelected={selected?.id === stream.id}
-              />
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   )
 }
