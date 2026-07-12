@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 
 // Webcam reale della cappella (click2stream.com) — non YouTube.
 const STREAM = { watchUrl: 'https://orokimadas-vac.click2stream.com/' }
@@ -7,19 +6,17 @@ const STREAM = { watchUrl: 'https://orokimadas-vac.click2stream.com/' }
 // Foto reale del Santissimo Sacramento esposto in un ostensorio.
 // Fonte: Wikimedia Commons, licenza CC-BY-SA 3.0, autore: PerfectUnityOrg.
 // https://commons.wikimedia.org/wiki/File:Eucharistic_Adoration_-_Monstrance.jpg
-// NOTA: come per l'audio, questo link non è verificabile con gli strumenti
-// di rete di questo ambiente (dominio non raggiungibile da qui) — va
-// controllato che l'immagine carichi davvero una volta pubblicato.
 const HERO_PHOTO_URL = 'https://upload.wikimedia.org/wikipedia/commons/6/62/Eucharistic_Adoration_-_Monstrance.jpg'
 
-export function Home() {
-  const { t }    = useTranslation()
-  const navigate = useNavigate()
+// Testi fissi in italiano — NON passano più da i18next/t(), per evitare
+// che possano mai mostrare la chiave grezza invece del testo tradotto.
+const SHORTCUTS = [
+  { ico:'🗺️', lbl:'Trova Gesù',  sub:'vicino a te', to:'/trova' },
+  { ico:'🙏', lbl:'Prega',       sub:'preghiere e devozioni', to:'/prega' },
+]
 
-  const SHORTCUTS = [
-    { ico:'🗺️', lbl: t('home.find_jesus'),  sub: t('home.find_jesus_sub'),  to:'/trova' },
-    { ico:'🙏', lbl: t('home.pray'),         sub: t('home.pray_sub'),         to:'/prega' },
-  ]
+export function Home() {
+  const navigate = useNavigate()
 
   return (
     <div className="pg home-page">
@@ -44,7 +41,7 @@ export function Home() {
         </div>
         <div style={{ padding:'10px 14px', display:'flex', alignItems:'center', gap:8 }}>
           <span className="ldot"/>
-          <div style={{ fontFamily:'Cinzel,serif', fontSize:'.72rem', color:'#e8d08a' }}>{t('home.live_label')}</div>
+          <div style={{ fontFamily:'Cinzel,serif', fontSize:'.72rem', color:'#e8d08a' }}>In diretta ora</div>
         </div>
       </a>
 
