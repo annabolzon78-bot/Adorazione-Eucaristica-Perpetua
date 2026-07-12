@@ -67,7 +67,7 @@ const FALLBACK_STREAMS: StreamData[] = [
   {
     id: '2', title: 'Sacré-Cœur de Montmartre — Adorazione', type: 'YOUTUBE_LIVE',
     status: 'ACTIVE', language: 'FR', continent: 'EUROPA',
-    url: 'https://www.youtube.com/live/GlGkFWPKomU',
+    url: 'https://www.youtube.com/live/GlGkFWPKomU?si=kg_GPkr5ranXUng0',
     embedUrl: 'https://www.youtube-nocookie.com/embed/GlGkFWPKomU?autoplay=1&rel=0',
     videoId: 'GlGkFWPKomU', isDefault: false, isFeatured: true,
     viewerCount: 312, totalViews: 98430, tags: ['adorazione', 'perpetua', 'parigi'],

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 const STREAMS = [
   { videoId: 'hMNLrStmcTs', watchUrl: 'https://www.youtube.com/watch?v=hMNLrStmcTs' },
-  { videoId: 'GlGkFWPKomU', watchUrl: 'https://www.youtube.com/watch?v=GlGkFWPKomU' },
+  { videoId: 'GlGkFWPKomU', watchUrl: 'https://www.youtube.com/live/GlGkFWPKomU?si=kg_GPkr5ranXUng0' },
 ]
 
 export function Home() {
