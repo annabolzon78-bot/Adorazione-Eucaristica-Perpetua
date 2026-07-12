@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useAdoration }   from '../hooks/useAdoration'
 
 const STREAMS = [
   'https://www.youtube.com/embed/hMNLrStmcTs?autoplay=1&rel=0&modestbranding=1',
@@ -11,7 +10,6 @@ const STREAMS = [
 export function Home() {
   const { t }    = useTranslation()
   const navigate = useNavigate()
-  const { stats, adoring, toggle } = useAdoration()
   const [liveIdx, setLiveIdx]      = useState(0)
 
   const SHORTCUTS = [
@@ -40,34 +38,6 @@ export function Home() {
         </div>
       </div>
 
-      {/* Demo banner */}
-      {stats.isDemo && !stats.isLoading && (
-        <div style={{ background:'#fef3c7', borderBottom:'1px solid #fcd34d', padding:'6px 14px', textAlign:'center', fontSize:'.7rem', color:'#92400e' }}>
-          📊 [DEMO] Dati simulati — il contatore reale si attiva dopo la configurazione Supabase
-        </div>
-      )}
-
-      <div style={{ textAlign:'center', margin:'12px 0' }}>
-        <span className="live-chip">
-          <span className="ldot"/>
-          {stats.isLoading ? '...' : stats.total.toLocaleString()} {t('home.people_adoring')} · {stats.nations} {t('home.nations')}
-        </span>
-      </div>
-
-      <div className="home-stats">
-        <div className="hs-item"><span className="hs-num">4.218</span><span className="hs-lbl">{t('home.chapels_world')}</span></div>
-        <div className="hs-item"><span className="hs-num">312</span><span className="hs-lbl">{t('home.perpetual_count')}</span></div>
-        <div className="hs-item"><span className="hs-num">{stats.isLoading ? '...' : stats.total.toLocaleString()}</span><span className="hs-lbl">{t('home.adorers_now')}</span></div>
-      </div>
-
-      <button
-        className="home-adoration-btn"
-        style={adoring ? { background:'linear-gradient(135deg,#166534,#15803d)' } : {}}
-        onClick={toggle}
-      >
-        {adoring ? t('home.adoring_active') : t('home.adoring_now')}
-      </button>
-
       <div className="home-cta-grid">
         {SHORTCUTS.map(({ ico, lbl, sub, to }) => (
           <div key={to} className="hcg-btn" onClick={() => navigate(to)}>
@@ -78,16 +48,6 @@ export function Home() {
         ))}
       </div>
 
-      <div className="home-hero">
-        <span className="hh-crown">❤️‍🔥</span>
-        <div className="hh-title">{t('home.hero_title')}</div>
-        <div className="hh-sub">{t('home.hero_sub')}</div>
-      </div>
-
-      <div style={{ background:'var(--goldl)', border:'1px solid var(--goldb)', borderRadius:10, padding:'12px 14px', textAlign:'center', fontStyle:'italic', fontSize:'.83rem', color:'var(--t2)', lineHeight:1.7 }}>
-        {t('home.quote_jp2')}
-        <span style={{ display:'block', fontSize:'.62rem', color:'var(--t3)', marginTop:4, fontStyle:'normal' }}>{t('home.quote_jp2_author')}</span>
-      </div>
     </div>
   )
 }
