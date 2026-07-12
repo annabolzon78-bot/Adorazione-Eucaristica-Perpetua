@@ -54,6 +54,11 @@ const SACRED_TRACKS = [
     url: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Schola_Gregoriana-Kyrie_eleison.ogg',
     credit: 'Schola Gregoriana — Wikimedia Commons',
   },
+  {
+    title: 'Salve Regina',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Petits_Chanteurs_de_Passy_-_Salve_Regina_de_Hermann_Contract.ogg',
+    credit: 'Les Petits Chanteurs de Passy — Wikimedia Commons',
+  },
 ]
 
 export function Layout() {
