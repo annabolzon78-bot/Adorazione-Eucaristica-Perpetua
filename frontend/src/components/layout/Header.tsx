@@ -12,7 +12,6 @@ export function Header() {
         <span style={{ fontSize:'1.4rem' }}>❤️‍🔥</span>
         <div>
           <div className="ah-logo-name">Adorazione Eucaristica</div>
-          <div className="ah-tagline">{t('header.tagline')}</div>
         </div>
       </div>
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
