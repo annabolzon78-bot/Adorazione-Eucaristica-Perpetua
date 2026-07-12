@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom'
-
 // Webcam reale della cappella (click2stream.com) — non YouTube.
 const STREAM = { watchUrl: 'https://orokimadas-vac.click2stream.com/' }
 
@@ -8,16 +6,7 @@ const STREAM = { watchUrl: 'https://orokimadas-vac.click2stream.com/' }
 // https://commons.wikimedia.org/wiki/File:Eucharistic_Adoration_-_Monstrance.jpg
 const HERO_PHOTO_URL = 'https://upload.wikimedia.org/wikipedia/commons/6/62/Eucharistic_Adoration_-_Monstrance.jpg'
 
-// Testi fissi in italiano — NON passano più da i18next/t(), per evitare
-// che possano mai mostrare la chiave grezza invece del testo tradotto.
-const SHORTCUTS = [
-  { ico:'🗺️', lbl:'Trova Gesù',  sub:'vicino a te', to:'/trova' },
-  { ico:'🙏', lbl:'Prega',       sub:'preghiere e devozioni', to:'/prega' },
-]
-
 export function Home() {
-  const navigate = useNavigate()
-
   return (
     <div className="pg home-page">
       <a
@@ -44,17 +33,6 @@ export function Home() {
           <div style={{ fontFamily:'Cinzel,serif', fontSize:'.72rem', color:'#e8d08a' }}>In diretta ora</div>
         </div>
       </a>
-
-      <div className="home-cta-grid">
-        {SHORTCUTS.map(({ ico, lbl, sub, to }) => (
-          <div key={to} className="hcg-btn" onClick={() => navigate(to)}>
-            <span className="hcg-icon">{ico}</span>
-            <span className="hcg-label">{lbl}</span>
-            <span className="hcg-sub">{sub}</span>
-          </div>
-        ))}
-      </div>
-
     </div>
   )
 }

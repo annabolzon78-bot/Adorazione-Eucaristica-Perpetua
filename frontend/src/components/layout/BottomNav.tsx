@@ -2,11 +2,8 @@ import { NavLink } from 'react-router-dom'
 
 const NAV = [
   { to:'/',         icon:'❤️‍🔥', label:'Home'      },
-  { to:'/trova',    icon:'🗺️',   label:'Trova'     },
-  { to:'/live',     icon:'▶',    label:'Live'      },
   { to:'/miracoli', icon:'✝️',   label:'Miracoli'  },
   { to:'/prega',    icon:'🙏',   label:'Prega'     },
-  { to:'/comunita', icon:'👥',   label:'Comunità'  },
 ]
 
 export function BottomNav() {
