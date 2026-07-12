@@ -9,7 +9,7 @@ interface Props {
 
 const TYPE_ICON: Record<string, string> = {
   YOUTUBE_LIVE:'▶', YOUTUBE_CHANNEL:'📺', VIMEO:'🎬',
-  HLS:'📡', FACEBOOK_LIVE:'📘', TWITCH:'🎮', CUSTOM_EMBED:'🖥',
+  HLS:'📡', FACEBOOK_LIVE:'📘', TWITCH:'🎮', CUSTOM_EMBED:'🖥', OTHER:'📡',
 }
 
 const LANG_FLAG: Record<string, string> = {

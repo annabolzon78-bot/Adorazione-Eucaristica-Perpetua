@@ -2,8 +2,7 @@
 import { useState } from 'react'
 interface StreamEntry { id:string; title:string; type:string; url:string; status:string; isDefault:boolean; language:string }
 const MOCK_STREAMS: StreamEntry[] = [
-  { id:'st1', title:"Adorazione Perpetua — Cappella 1", type:'YOUTUBE_LIVE', url:'https://www.youtube-nocookie.com/embed/hMNLrStmcTs', status:'ACTIVE', isDefault:true, language:'EN' },
-  { id:'st2', title:"Adorazione Perpetua — Cappella 2", type:'YOUTUBE_LIVE', url:'https://www.youtube-nocookie.com/embed/GlGkFWPKomU', status:'ACTIVE', isDefault:false, language:'EN' },
+  { id:'st1', title:"Adorazione Perpetua — Cappella 1", type:'OTHER', url:'https://orokimadas-vac.click2stream.com/', status:'ACTIVE', isDefault:true, language:'EN' },
 ]
 const TYPES = ['YOUTUBE_LIVE','YOUTUBE_CHANNEL','VIMEO','HLS','FACEBOOK_LIVE','TWITCH','CUSTOM_EMBED']
 const LANGS = ['IT','EN','ES','FR','DE','PT','PL','ZH','JA','KO','AR']

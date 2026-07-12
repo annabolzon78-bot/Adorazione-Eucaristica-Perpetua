@@ -52,29 +52,15 @@ export interface StreamFilter {
 // ⚠️  DATI DEMO — visualizzati solo quando il backend non risponde
 const FALLBACK_STREAMS: StreamData[] = [
   {
-    id: '1', title: "St Mary's Parish — Cappella Adorazione", type: 'YOUTUBE_LIVE',
+    id: '1', title: "St Mary's Parish — Cappella Adorazione", type: 'OTHER',
     status: 'ACTIVE', language: 'EN', continent: 'EUROPA',
-    url: 'https://www.youtube.com/live/hMNLrStmcTs',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/hMNLrStmcTs?autoplay=1&rel=0',
-    videoId: 'hMNLrStmcTs', isDefault: true, isFeatured: true,
+    url: 'https://orokimadas-vac.click2stream.com/',
+    isDefault: true, isFeatured: true,
     viewerCount: 47, totalViews: 12840, tags: ['adorazione', 'perpetua', 'irlanda'],
     description: 'Cappella dell\'Adorazione Eucaristica di St Mary\'s Parish, Navan. Streaming continuo 24 ore su 24.',
     parish: { id: 'p1', name: "St Mary's Parish", city: { name: 'Navan' }, country: { nameIt: 'Irlanda', flagEmoji: '🇮🇪' } },
     schedules: [
       { id: 's1', dayOfWeek: 0, startTime: '00:00', endTime: '23:59', timezone: 'Europe/Dublin', isRecurring: true },
-    ], createdAt: '2024-01-01',
-  },
-  {
-    id: '2', title: 'Sacré-Cœur de Montmartre — Adorazione', type: 'YOUTUBE_LIVE',
-    status: 'ACTIVE', language: 'FR', continent: 'EUROPA',
-    url: 'https://www.youtube.com/live/GlGkFWPKomU?si=kg_GPkr5ranXUng0',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/GlGkFWPKomU?autoplay=1&rel=0',
-    videoId: 'GlGkFWPKomU', isDefault: false, isFeatured: true,
-    viewerCount: 312, totalViews: 98430, tags: ['adorazione', 'perpetua', 'parigi'],
-    description: 'Adorazione Eucaristica dalla Basilica del Sacro Cuore di Montmartre, Parigi.',
-    parish: { id: 'p2', name: 'Sacré-Cœur Montmartre', city: { name: 'Paris' }, country: { nameIt: 'Francia', flagEmoji: '🇫🇷' } },
-    schedules: [
-      { id: 's2', dayOfWeek: 0, startTime: '00:00', endTime: '23:59', timezone: 'Europe/Paris', isRecurring: true },
     ], createdAt: '2024-01-01',
   },
 ]
