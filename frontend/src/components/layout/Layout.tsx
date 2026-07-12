@@ -63,7 +63,7 @@ export function Layout() {
       </main>
       <BottomNav />
 
-      <audio ref={audioRef} src={track.url} loop preload="none" onEnded={nextTrack} />
+      <audio ref={audioRef} src={track.url} preload="none" onEnded={nextTrack} />
 
       <div style={{ position: 'fixed', bottom: 78, right: 16, zIndex: 40, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
         {playing && (
@@ -74,17 +74,17 @@ export function Layout() {
             {track.title}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <button
             onClick={nextTrack}
             aria-label={`Cambia brano — attuale: ${track.title}`}
             title="Prossimo brano"
             style={{
-              width: 38, height: 38, borderRadius: '50%',
+              width: 40, height: 40, borderRadius: '50%',
               background: 'rgba(20,10,6,.85)', border: '1.5px solid #e8d08a',
-              color: '#e8d08a', fontSize: '.95rem',
+              color: '#e8d08a', fontSize: '1rem',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(0,0,0,.35)', cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(0,0,0,.35)', cursor: 'pointer', flexShrink: 0,
             }}
           >
             ⏭
@@ -93,14 +93,19 @@ export function Layout() {
             onClick={toggleMusic}
             aria-label={playing ? 'Metti in pausa la musica sacra' : 'Attiva la musica sacra di sottofondo'}
             style={{
-              width: 46, height: 46, borderRadius: '50%',
-              background: 'rgba(20,10,6,.85)', border: '1.5px solid #e8d08a',
-              color: '#e8d08a', fontSize: '1.2rem',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(0,0,0,.35)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 8,
+              height: 56, padding: '0 18px 0 16px', borderRadius: 28,
+              background: playing ? 'linear-gradient(135deg,#b8932a,#d4af37)' : 'rgba(20,10,6,.9)',
+              border: '2px solid #e8d08a',
+              color: playing ? '#2a1a05' : '#e8d08a', fontSize: '1.5rem', fontWeight: 700,
+              boxShadow: playing ? '0 4px 20px rgba(212,175,55,.55)' : '0 4px 14px rgba(0,0,0,.4)',
+              cursor: 'pointer', flexShrink: 0,
             }}
           >
-            {playing ? '🔊' : '🔈'}
+            <span>{playing ? '🔊' : '🔈'}</span>
+            <span style={{ fontSize: '.78rem', fontFamily: 'Cinzel,serif', letterSpacing: '.03em' }}>
+              {playing ? 'Musica' : 'Musica'}
+            </span>
           </button>
         </div>
       </div>
